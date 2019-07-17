@@ -1,92 +1,94 @@
-if __name__ == '__main__':
-    import os
-    import threading
-    import time
-    import webbrowser
-    import logging
+import os
+import threading
+import time
+import webbrowser
+import logging
 
-    currentProject = ''
-    currentApp = ''
+currentProject = ''
+currentApp = ''
 
-    def check_requirements():
-        run_cmd('pip freeze > requirements.txt')
-        requirements = {}
-        with open('requirements.txt', 'r') as f:
-            for line in f:
-                key, value = line.split('==')
-                requirements[key] = value[:-1]
-            f.close()
-        if 'Django' in requirements:
-            if requirements['Django'] != '1.10.5':
-                logging.error("Requirement not satisfied !!!\n")
-                create_env()
-            else:
-                logging.warning('Requirements satisfied')
-        else:
-            logging.error('No Django Installed')
+
+def check_requirements():
+    run_cmd('pip freeze > requirements.txt')
+    requirements = {}
+    with open('requirements.txt', 'r') as f:
+        for line in f:
+            key, value = line.split('==')
+            requirements[key] = value[:-1]
+        f.close()
+    if 'Django' in requirements:
+        if requirements['Django'] != '1.10.5':
+            logging.error("Requirement not satisfied !!!\n")
             create_env()
-
-    def create_env():
-        os.system('virtualenv djangoEnv')
-        os.system('/bin/bash --rcfile ./djangoEnv.sh')
-        check_requirements()
-
-    def get_input(type_value):
-        return input("Enter your {} name \n".format(type_value))
-
-
-    def run_cmd(value):
-        os.system(value)
-        logging.warning('\n \n {} executed \n \n'.format(value))
-
-
-    def create_project():
-        projectName = get_input("project")
-        # check for duplicates
-        if check_dir_exists(projectName) != True:
-            global currentProject
-            currentProject = projectName
-            startProject = 'django-admin startproject {}'.format(projectName)
-            run_cmd(startProject)
-            logging.warning('project {} created..'.format(projectName))
         else:
-            logging.error(projectName + ' has already been created')
-            create_project()
+            logging.warning('Requirements satisfied')
+    else:
+        logging.error('No Django Installed')
+        create_env()
 
 
-    def create_app():
-        appName = get_input("application")
-        if check_dir_exists(appName) != True:
-            global currentApp
-            currentApp = appName
-            startApp = 'cd {p} && django-admin startapp {a}'.format(p=currentProject, a=appName)
-            run_cmd(startApp)
-            logging.warning('app {} created..'.format(appName))
-        else:
-            logging.warning(appName + ' has already been created')
+def create_env():
+    os.system('virtualenv djangoEnv')
+    os.system('/bin/bash --rcfile ./djangoEnv.sh')
+    check_requirements()
 
 
-    def set_folder_structure():
-        dirCreation = '''cd {p} && mkdir templates templates/{x} templates/{x}/partials templates/{x}/layouts templates/{x}/extras static static/css static/js static/images media'''.format(
-            p=currentProject, x=currentApp)
-        run_cmd(dirCreation)
-        logging.warning('folder structure done...\n')
+def get_input(type_value):
+    return input("Enter your {} name \n".format(type_value))
 
 
-    def check_dir_exists(value):
-        return os.path.exists(os.getcwd() + '/' + value)
+def run_cmd(value):
+    os.system(value)
+    logging.warning('\n \n {} executed \n \n'.format(value))
 
 
-    def config_settings():
-        APP_KEY = ''
-        line_num = 0
-        with open('{}/{}/settings.py'.format(currentProject, currentProject), 'rt') as f:
-            for line in f:
-                line_num += 1
-                if line_num == 23:
-                    APP_KEY = line.strip()[13:]
-            f.close()
-        settings_template = '''
+def create_project():
+    projectName = get_input("project")
+    # check for duplicates
+    if check_dir_exists(projectName) != True:
+        global currentProject
+        currentProject = projectName
+        startProject = 'django-admin startproject {}'.format(projectName)
+        run_cmd(startProject)
+        logging.warning('project {} created..'.format(projectName))
+    else:
+        logging.error(projectName + ' has already been created')
+        create_project()
+
+
+def create_app():
+    appName = get_input("application")
+    if check_dir_exists(appName) != True:
+        global currentApp
+        currentApp = appName
+        startApp = 'cd {p} && django-admin startapp {a}'.format(p=currentProject, a=appName)
+        run_cmd(startApp)
+        logging.warning('app {} created..'.format(appName))
+    else:
+        logging.warning(appName + ' has already been created')
+
+
+def set_folder_structure():
+    dirCreation = '''cd {p} && mkdir templates templates/{x} templates/{x}/partials templates/{x}/layouts templates/{x}/extras static static/css static/js static/images media'''.format(
+        p=currentProject, x=currentApp)
+    run_cmd(dirCreation)
+    logging.warning('folder structure done...\n')
+
+
+def check_dir_exists(value):
+    return os.path.exists(os.getcwd() + '/' + value)
+
+
+def config_settings():
+    APP_KEY = ''
+    line_num = 0
+    with open('{}/{}/settings.py'.format(currentProject, currentProject), 'rt') as f:
+        for line in f:
+            line_num += 1
+            if line_num == 23:
+                APP_KEY = line.strip()[13:]
+        f.close()
+    settings_template = '''
 """
 Django settings for {p} project.
 
@@ -124,40 +126,40 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    '{a}',
+'django.contrib.admin',
+'django.contrib.auth',
+'django.contrib.contenttypes',
+'django.contrib.sessions',
+'django.contrib.messages',
+'django.contrib.staticfiles',
+'{a}',
 ]
 
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+'django.middleware.security.SecurityMiddleware',
+'django.contrib.sessions.middleware.SessionMiddleware',
+'django.middleware.common.CommonMiddleware',
+'django.middleware.csrf.CsrfViewMiddleware',
+'django.contrib.auth.middleware.AuthenticationMiddleware',
+'django.contrib.messages.middleware.MessageMiddleware',
+'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 ROOT_URLCONF = '{p}.urls'
 
 TEMPLATES = [
-    {{
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [TEMPLATE_DIR, ],
-        'APP_DIRS': True,
-        'OPTIONS': {{
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
-            ],
-        }},
+{{
+    'BACKEND': 'django.template.backends.django.DjangoTemplates',
+    'DIRS': [TEMPLATE_DIR, ],
+    'APP_DIRS': True,
+    'OPTIONS': {{
+        'context_processors': [
+            'django.template.context_processors.debug',
+            'django.template.context_processors.request',
+            'django.contrib.auth.context_processors.auth',
+            'django.contrib.messages.context_processors.messages',
+        ],
     }},
+}},
 ]
 
 WSGI_APPLICATION = '{p}.wsgi.application'
@@ -167,10 +169,10 @@ WSGI_APPLICATION = '{p}.wsgi.application'
 # https://docs.djangoproject.com/en/1.10/ref/settings/#databases
 
 DATABASES = {{
-    'default': {{
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }}
+'default': {{
+    'ENGINE': 'django.db.backends.sqlite3',
+    'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+}}
 }}
 
 
@@ -178,18 +180,18 @@ DATABASES = {{
 # https://docs.djangoproject.com/en/1.10/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
-    {{
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    }},
-    {{
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    }},
-    {{
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    }},
-    {{
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    }},
+{{
+    'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+}},
+{{
+    'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+}},
+{{
+    'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+}},
+{{
+    'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+}},
 ]
 
 # Internationalization
@@ -214,273 +216,275 @@ MEDIA_ROOT = '/media/'
 MEDIA_URL = MEDIA_ROOT
 
 STATICFILES_DIRS = [
-    STATIC_DIR,
+STATIC_DIR,
 ]
-        '''.format(p=currentProject, a=currentApp, app_key=APP_KEY)
+    '''.format(p=currentProject, a=currentApp, app_key=APP_KEY)
 
-        with open('{}/{}/settings.py'.format(currentProject, currentProject), 'w') as f:
-            f.write(settings_template)
-            f.close()
+    with open('{}/{}/settings.py'.format(currentProject, currentProject), 'w') as f:
+        f.write(settings_template)
+        f.close()
 
-        logging.warning("Settings configured..\n")
+    logging.warning("Settings configured..\n")
 
 
-    def create_template_files():
-        with open(os.getcwd() + '/' + currentProject + '/static/js/' + '/script.js', 'w') as f:
-            script_string = '''
+def create_template_files():
+    with open(os.getcwd() + '/' + currentProject + '/static/js/' + '/script.js', 'w') as f:
+        script_string = '''
 console.log('im always running from script.js file');
-            '''
-            f.write(script_string)
-            f.close()
+        '''
+        f.write(script_string)
+        f.close()
 
-        with open(os.getcwd() + '/' + currentProject + '/static/css/' + '/style.css', 'w') as f:
-            style_string = '''
+    with open(os.getcwd() + '/' + currentProject + '/static/css/' + '/style.css', 'w') as f:
+        style_string = '''
 body{
-  margin: 0;
-  padding: 0;
+margin: 0;
+padding: 0;
 }
 
 .main-content{
-  min-height: calc(100vh - 100px);
+min-height: calc(100vh - 100px);
 }
 
 footer{
-  height: 80px;
-  background: #ccc;
+height: 80px;
+background: #ccc;
 }
 
 .copyright{
-  background: #000;
-  height: 20px;
-  color: #fff;
+background: #000;
+height: 20px;
+color: #fff;
 }
-            '''
-            f.write(style_string)
-            f.close()
+        '''
+        f.write(style_string)
+        f.close()
 
-        with open(os.getcwd() + '/' + currentProject + '/templates/' + currentApp + '/base.html', 'w') as f:
-            base_string = """
+    with open(os.getcwd() + '/' + currentProject + '/templates/' + currentApp + '/base.html', 'w') as f:
+        base_string = """
 <!DOCTYPE html>
 {{% load staticfiles %}}
 <html lang="en" dir="ltr">
-  <head>
-    <meta charset="utf-8">
-    <title>
-        {p} - {a}
-        {{% block title %}}
-        {{% endblock %}}
-    </title>
-    {{% include '{a}/partials/head.html' %}}
-  </head>
-  <body>
-    <!-- start editing from here -->
-    <div class="main-content">
-        {{% include '{a}/partials/nav.html' %}}
-        {{% block content %}}
-        {{% endblock %}}
-    </div>
-    {{% include '{a}/partials/footer.html' %}}
-    {{% include '{a}/partials/copyright.html' %}}
-
-    {{% include '{a}/partials/script.html' %}}
-
-    {{% block scripts %}}
+<head>
+<meta charset="utf-8">
+<title>
+    {p} - {a}
+    {{% block title %}}
     {{% endblock %}}
-  </body>
-</html>""".format(p=currentProject, a=currentApp)
-            f.write(base_string)
-            f.close()
+</title>
+{{% include '{a}/partials/head.html' %}}
+</head>
+<body>
+<!-- start editing from here -->
+<div class="main-content">
+    {{% include '{a}/partials/nav.html' %}}
+    {{% block content %}}
+    {{% endblock %}}
+</div>
+{{% include '{a}/partials/footer.html' %}}
+{{% include '{a}/partials/copyright.html' %}}
 
-        with open(os.getcwd() + '/' + currentProject + '/templates/' + currentApp + '/partials/head.html', 'w') as f:
-            f.write('''
+{{% include '{a}/partials/script.html' %}}
+
+{{% block scripts %}}
+{{% endblock %}}
+</body>
+</html>""".format(p=currentProject, a=currentApp)
+        f.write(base_string)
+        f.close()
+
+    with open(os.getcwd() + '/' + currentProject + '/templates/' + currentApp + '/partials/head.html', 'w') as f:
+        f.write('''
 {% load staticfiles %}
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
 ''')
-            f.close()
+        f.close()
 
-        with open(os.getcwd() + '/' + currentProject + '/templates/' + currentApp + '/partials/nav.html', 'w') as f:
-            nav_string = """
+    with open(os.getcwd() + '/' + currentProject + '/templates/' + currentApp + '/partials/nav.html', 'w') as f:
+        nav_string = """
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
-  <a class="navbar-brand" href="{{% url '{a}:index' %}}">{a}</a>
-  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-    <span class="navbar-toggler-icon"></span>
-  </button>
+<a class="navbar-brand" href="{{% url '{a}:index' %}}">{a}</a>
+<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+<span class="navbar-toggler-icon"></span>
+</button>
 
-  <div class="collapse navbar-collapse" id="navbarSupportedContent">
-    <ul class="navbar-nav mr-auto">
-      <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          Dropdown
-        </a>
-        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-          <a class="dropdown-item" href="#">Action</a>
-          <a class="dropdown-item" href="#">Another action</a>
-          <div class="dropdown-divider"></div>
-          <a class="dropdown-item" href="#">Something else here</a>
-        </div>
-      </li>
-    </ul>
-    <ul class="navbar-nav ml-auto">
-      <li class="nav-item active">
-        <a class="nav-link" href="{{% url '{a}:index' %}}">Home <span class="sr-only">(current)</span></a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="{{% url 'admin:index' %}}">Admin</a>
-      </li>
-    </ul>
-  </div>
-</nav>
-    """.format(a=currentApp)
-            f.write(nav_string)
-            f.close()
-        with open(os.getcwd() + '/' + currentProject + '/templates/' + currentApp + '/partials/footer.html', 'w') as f:
-            footer_string = '''
-<footer class="footer">
-  <div class="row no-gutters">
-    <div class="col-4 text-center">
-      hello this is footer
+<div class="collapse navbar-collapse" id="navbarSupportedContent">
+<ul class="navbar-nav mr-auto">
+  <li class="nav-item dropdown">
+    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      Dropdown
+    </a>
+    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+      <a class="dropdown-item" href="#">Action</a>
+      <a class="dropdown-item" href="#">Another action</a>
+      <div class="dropdown-divider"></div>
+      <a class="dropdown-item" href="#">Something else here</a>
     </div>
-    <div class="col-4 text-center">
-      hello this is footer
-    </div>
-    <div class="col-4 text-center">
-      hello this is footer
-    </div>
-  </div>
-</footer>
-            '''
-            f.write(footer_string)
-            f.close()
-
-        with open(os.getcwd() + '/' + currentProject + '/templates/' + currentApp + '/partials/copyright.html', 'w') as f:
-            copyright_string = '''
-<div class="copyright">
-  <div class="col-12 text-center">
-    this is copyright
-  </div>
+  </li>
+</ul>
+<ul class="navbar-nav ml-auto">
+  <li class="nav-item active">
+    <a class="nav-link" href="{{% url '{a}:index' %}}">Home <span class="sr-only">(current)</span></a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="{{% url 'admin:index' %}}">Admin</a>
+  </li>
+</ul>
 </div>
-    '''
-            f.write(copyright_string)
-            f.close()
+</nav>
+""".format(a=currentApp)
+        f.write(nav_string)
+        f.close()
+    with open(os.getcwd() + '/' + currentProject + '/templates/' + currentApp + '/partials/footer.html', 'w') as f:
+        footer_string = '''
+<footer class="footer">
+<div class="row no-gutters">
+<div class="col-4 text-center">
+  hello this is footer
+</div>
+<div class="col-4 text-center">
+  hello this is footer
+</div>
+<div class="col-4 text-center">
+  hello this is footer
+</div>
+</div>
+</footer>
+        '''
+        f.write(footer_string)
+        f.close()
 
-        with open(os.getcwd() + '/' + currentProject + '/templates/' + currentApp + '/partials/script.html', 'w') as f:
-            script_string = """
-            {% load staticfiles %}
+    with open(os.getcwd() + '/' + currentProject + '/templates/' + currentApp + '/partials/copyright.html', 'w') as f:
+        copyright_string = '''
+<div class="copyright">
+<div class="col-12 text-center">
+this is copyright
+</div>
+</div>
+'''
+        f.write(copyright_string)
+        f.close()
+
+    with open(os.getcwd() + '/' + currentProject + '/templates/' + currentApp + '/partials/script.html', 'w') as f:
+        script_string = """
+        {% load staticfiles %}
 <script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
 <script type="text/javascript" src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
 <script type="text/javascript" src="{% static 'js/script.js' %}"></script>"""
-            f.write(script_string)
-            f.close()
+        f.write(script_string)
+        f.close()
 
-        with open(os.getcwd() + '/' + currentProject + '/templates/' + currentApp + '/layouts/index.html', 'w') as f:
-            index_string = """
+    with open(os.getcwd() + '/' + currentProject + '/templates/' + currentApp + '/layouts/index.html', 'w') as f:
+        index_string = """
 {% extends '../base.html' %}
 {% block title %}
-    Homepage
+Homepage
 {% endblock %}
 
 {% block content %}
-    <div class="container">
-        <h1>welcome to pre written boilerplate of django</h1>
-    </div>
+<div class="container">
+    <h1>welcome to pre written boilerplate of django</h1>
+</div>
 {% endblock %}
 
 {% block scripts %}
 <script type="text/javascript>
-    console.log('from index html');
+console.log('from index html');
 </script>
 {% endblock %}
-    """
-            f.write(index_string)
-            f.close()
+"""
+        f.write(index_string)
+        f.close()
 
-        logging.warning("Templating files created..\n")
-
-
-    def runserver(value='8000'):
-        arg_1 = 'cd {} && python manage.py runserver localhost:{}'.format(currentProject, value)
-        t1 = threading.Thread(target=run_cmd, args=(arg_1,))
-        t2 = threading.Thread(target=wb_open, args=(value,))
-
-        t1.start()
-        time.sleep(1)
-        t2.start()
-        t1.join()
-        t2.join()
+    logging.warning("Templating files created..\n")
 
 
-    def wb_open(value):
-        webbrowser.open('http://localhost:{v}/{a}'.format(v=value, a=currentApp), new=2)
+def runserver(value='8000'):
+    arg_1 = 'cd {} && python manage.py runserver localhost:{}'.format(currentProject, value)
+    t1 = threading.Thread(target=run_cmd, args=(arg_1,))
+    t2 = threading.Thread(target=wb_open, args=(value,))
+
+    t1.start()
+    time.sleep(1)
+    t2.start()
+    t1.join()
+    t2.join()
 
 
-    def migrate_models():
-        run_cmd('cd {} && python manage.py migrate'.format(currentProject))
-        logging.warning('migrated...!!\n')
+def wb_open(value):
+    webbrowser.open('http://localhost:{v}/{a}'.format(v=value, a=currentApp), new=2)
 
 
-    def make_migration_models(value=currentApp):
-        run_cmd('cd {} && python manage.py makemigrations {}'.format(currentProject, value))
-        logging.warning('migrations applied...!!\n')
+def migrate_models():
+    run_cmd('cd {} && python manage.py migrate'.format(currentProject))
+    logging.warning('migrated...!!\n')
 
 
-    def edit_project_urls():
-        with open(os.getcwd() + '/' + currentProject + '/' + currentProject + '/' + 'urls.py', 'w') as f:
-            url_string = '''
+def make_migration_models(value=currentApp):
+    run_cmd('cd {} && python manage.py makemigrations {}'.format(currentProject, value))
+    logging.warning('migrations applied...!!\n')
+
+
+def edit_project_urls():
+    with open(os.getcwd() + '/' + currentProject + '/' + currentProject + '/' + 'urls.py', 'w') as f:
+        url_string = '''
 """{p} URL Configuration
 
 The `urlpatterns` list routes URLs to views. For more warningrmation please see:
-    https://docs.djangoproject.com/en/1.10/topics/http/urls/
+https://docs.djangoproject.com/en/1.10/topics/http/urls/
 Examples:
 Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  url(r'^$', views.home, name='home')
+1. Add an import:  from my_app import views
+2. Add a URL to urlpatterns:  url(r'^$', views.home, name='home')
 Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  url(r'^$', Home.as_view(), name='home')
+1. Add an import:  from other_app.views import Home
+2. Add a URL to urlpatterns:  url(r'^$', Home.as_view(), name='home')
 Including another URLconf
-    1. Import the include() function: from django.conf.urls import url, include
-    2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
+1. Import the include() function: from django.conf.urls import url, include
+2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
 from django.conf.urls import url, include
 from django.contrib import admin
 
 urlpatterns = [
-    url(r'^{a}/', include('{a}.urls')),
-    url(r'^admin/', admin.site.urls),
+url(r'^{a}/', include('{a}.urls')),
+url(r'^admin/', admin.site.urls),
 ]
-        '''.format(p=currentProject, a=currentApp)
-            f.write(url_string)
-            f.close()
+    '''.format(p=currentProject, a=currentApp)
+        f.write(url_string)
+        f.close()
 
 
-    def create_app_urls():
-        with open(os.getcwd() + '/' + currentProject + '/' + currentApp + '/' + 'urls.py', 'w') as f:
-            url_string = '''
+def create_app_urls():
+    with open(os.getcwd() + '/' + currentProject + '/' + currentApp + '/' + 'urls.py', 'w') as f:
+        url_string = '''
 from django.conf.urls import url
 from {a} import views
 
 app_name = '{a}'
 urlpatterns = [
-    url(r'^$', views.index, name="index"),
+url(r'^$', views.index, name="index"),
 ]
-    '''.format(a=currentApp)
-            f.write(url_string)
-            f.close()
+'''.format(a=currentApp)
+        f.write(url_string)
+        f.close()
 
 
-    def edit_app_views():
-        with open(os.getcwd() + '/' + currentProject + '/' + currentApp + '/' + 'views.py', 'w') as f:
-            views_string = '''
+def edit_app_views():
+    with open(os.getcwd() + '/' + currentProject + '/' + currentApp + '/' + 'views.py', 'w') as f:
+        views_string = '''
 from django.shortcuts import render
 
 def index(request):
-    return render(request, '{a}/layouts/index.html')
-        '''.format(a=currentApp)
-            f.write(views_string)
-            f.close()
+return render(request, '{a}/layouts/index.html')
+    '''.format(a=currentApp)
+        f.write(views_string)
+        f.close()
 
+
+if __name__ == '__main__':
     check_requirements()
     create_project()
     create_app()
