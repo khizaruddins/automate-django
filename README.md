@@ -13,9 +13,7 @@ python 3+:
 
 install from https://python.org
 
-django:
-
-    pip install django=1.10
+just run automate_django.py on your terminal
 
 run automate-django.py from project folder you want to create with
 
