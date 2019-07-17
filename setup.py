@@ -6,23 +6,25 @@ with open('README.md') as readme_file:
 with open('HISTORY.md') as history_file:
     HISTORY = history_file.read()
 
-setup_args = dict(
-    name='automate-django',
-    version='0.1',
-    description='Useful tool to create a static running django application Python',
-    long_description_content_type="text/markdown",
-    long_description=README + '\n\n' + HISTORY,
-    license='MIT',
-    packages=find_packages(),
-    author='Syed Khizaruddin',
-    author_email='khizaruddins@gmail.com',
-    keywords=['Django', 'Automation', 'DjangoAutomation', 'AutomateDjango', 'DjangoAutomate', 'AutomationDjango'],
-    url='https://github.com/khizaruddins/automate-django',
-    download_url='https://pypi.org/project/automate-django/'
+setup(
+  name='automate-django',
+  packages=find_packages(),
+  version='0.1.2',
+  license='MIT',
+  description='Useful tool to create a static running django application Python',
+  long_description_content_type="text/markdown",
+  long_description=README + '\n\n' + HISTORY,
+  author='Syed Khizaruddin',
+  author_email='khizaruddins@gmail.com',
+  url='https://github.com/khizaruddins/automate-django',
+  keywords=['Django', 'Automation', 'DjangoAutomation', 'AutomateDjango', 'DjangoAutomate', 'AutomationDjango'],
+  classifiers=[
+    'Development Status :: 4 - Beta',
+    'Topic :: Software Development :: Build Tools :: Django static webpage Automation',
+    'License :: OSI Approved :: MIT License',
+    'Programming Language :: Python :: 3.4',
+    'Programming Language :: Python :: 3.5',
+    'Programming Language :: Python :: 3.6',
+    'Programming Language :: Python :: 3.7',
+  ],
 )
-
-install_requires = [
-]
-
-if __name__ == '__main__':
-    setup(**setup_args, install_requires=install_requires)
