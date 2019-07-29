@@ -15,7 +15,7 @@ install from https://python.org
 
 use:
 
-        pip3 install automate_django
+    pip3 install automate_django
 
 
 import package as shown below:
