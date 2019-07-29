@@ -13,13 +13,19 @@ python 3+:
 
 install from https://python.org
 
-just run automate_django.py on your terminal
+import package as shown below:
 
-run automate-django.py from project folder you want to create with
+    from automate_django import automate_django as ad
+
+    ad.create_project()
+    
+run your file using python3 filename.py
 
 enter project name and application name and sit back:
 
 your project will be running in your default browser
+
+and automatically you will see website running in your default web browser
 
 you can edit reuse code 
 
