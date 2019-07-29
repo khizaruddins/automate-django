@@ -9,7 +9,7 @@ with open('HISTORY.md') as history_file:
 setup(
   name='automate-django',
   packages=find_packages(),
-  version='0.1.2',
+  version='0.2',
   license='MIT',
   description='Useful tool to create a static running django application Python',
   long_description_content_type="text/markdown",
