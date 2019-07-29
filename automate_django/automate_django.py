@@ -4,44 +4,20 @@ import time
 import webbrowser
 import logging
 
+# global variables
 currentProject = ''
 currentApp = ''
 
-
-def check_requirements():
-    run_cmd('pip freeze > requirements.txt')
-    requirements = {}
-    with open('requirements.txt', 'r') as f:
-        for line in f:
-            key, value = line.split('==')
-            requirements[key] = value[:-1]
-        f.close()
-    if 'Django' in requirements:
-        if requirements['Django'] != '1.10.5':
-            logging.error("Requirement not satisfied !!!\n")
-            create_env()
-        else:
-            logging.warning('Requirements satisfied')
-    else:
-        logging.error('No Django Installed')
-        create_env()
-
-
-def create_env():
-    os.system('virtualenv djangoEnv')
-    os.system('/bin/bash --rcfile ./djangoEnv.sh')
-    check_requirements()
-
-
+# an input function
 def get_input(type_value):
     return input("Enter your {} name \n".format(type_value))
 
-
+# will run os commands
 def run_cmd(value):
     os.system(value)
     logging.warning('\n \n {} executed \n \n'.format(value))
 
-
+# will create django projects
 def create_project():
     projectName = get_input("project")
     # check for duplicates
@@ -55,7 +31,9 @@ def create_project():
         logging.error(projectName + ' has already been created')
         create_project()
 
+    create_app()
 
+# will create django app
 def create_app():
     appName = get_input("application")
     if check_dir_exists(appName) != True:
@@ -67,18 +45,24 @@ def create_app():
     else:
         logging.warning(appName + ' has already been created')
 
+    config_settings()
 
+# this function will create folders for templates partials layouts etc
 def set_folder_structure():
     dirCreation = '''cd {p} && mkdir templates templates/{x} templates/{x}/partials templates/{x}/layouts templates/{x}/extras static static/css static/js static/images media'''.format(
         p=currentProject, x=currentApp)
     run_cmd(dirCreation)
     logging.warning('folder structure done...\n')
+    
+    create_template_files()
 
 
+# check whether a directory exists or not
 def check_dir_exists(value):
     return os.path.exists(os.getcwd() + '/' + value)
 
 
+# configure the django's settings.py file
 def config_settings():
     APP_KEY = ''
     line_num = 0
@@ -226,7 +210,10 @@ STATIC_DIR,
 
     logging.warning("Settings configured..\n")
 
+    set_folder_structure()
 
+
+# creation of template files eg style.css script.js and other html files
 def create_template_files():
     with open(os.getcwd() + '/' + currentProject + '/static/js/' + '/script.js', 'w') as f:
         script_string = '''
@@ -238,23 +225,23 @@ console.log('im always running from script.js file');
     with open(os.getcwd() + '/' + currentProject + '/static/css/' + '/style.css', 'w') as f:
         style_string = '''
 body{
-margin: 0;
-padding: 0;
+    margin: 0;
+    padding: 0;
 }
 
 .main-content{
-min-height: calc(100vh - 100px);
+    min-height: calc(100vh - 100px);
 }
 
 footer{
-height: 80px;
-background: #ccc;
+    height: 80px;
+    background: #ccc;
 }
 
 .copyright{
-background: #000;
-height: 20px;
-color: #fff;
+    background: #000;
+    height: 20px;
+    color: #fff;
 }
         '''
         f.write(style_string)
@@ -399,12 +386,16 @@ console.log('from index html');
         f.close()
 
     logging.warning("Templating files created..\n")
+    edit_project_urls()
 
 
+# function to run server
 def runserver(value='8000'):
     arg_1 = 'cd {} && python manage.py runserver localhost:{}'.format(currentProject, value)
     t1 = threading.Thread(target=run_cmd, args=(arg_1,))
     t2 = threading.Thread(target=wb_open, args=(value,))
+    
+    # threading to process multiple tasks
 
     t1.start()
     time.sleep(1)
@@ -413,20 +404,28 @@ def runserver(value='8000'):
     t2.join()
 
 
+
+# to open web browser after all tasks has been completed
 def wb_open(value):
     webbrowser.open('http://localhost:{v}/{a}'.format(v=value, a=currentApp), new=2)
 
 
+# models migration function
 def migrate_models():
     run_cmd('cd {} && python manage.py migrate'.format(currentProject))
     logging.warning('migrated...!!\n')
+    make_migration_models()
 
 
+# make migration function
 def make_migration_models(value=currentApp):
     run_cmd('cd {} && python manage.py makemigrations {}'.format(currentProject, value))
     logging.warning('migrations applied...!!\n')
+    
+    runserver()
 
 
+# edit root project urls
 def edit_project_urls():
     with open(os.getcwd() + '/' + currentProject + '/' + currentProject + '/' + 'urls.py', 'w') as f:
         url_string = '''
@@ -455,8 +454,10 @@ url(r'^admin/', admin.site.urls),
     '''.format(p=currentProject, a=currentApp)
         f.write(url_string)
         f.close()
+    create_app_urls()
 
 
+# create app urls.py file
 def create_app_urls():
     with open(os.getcwd() + '/' + currentProject + '/' + currentApp + '/' + 'urls.py', 'w') as f:
         url_string = '''
@@ -470,30 +471,19 @@ url(r'^$', views.index, name="index"),
 '''.format(a=currentApp)
         f.write(url_string)
         f.close()
+    edit_app_views()
 
 
+# edit app views file
 def edit_app_views():
     with open(os.getcwd() + '/' + currentProject + '/' + currentApp + '/' + 'views.py', 'w') as f:
         views_string = '''
 from django.shortcuts import render
 
 def index(request):
-return render(request, '{a}/layouts/index.html')
+    return render(request, '{a}/layouts/index.html')
     '''.format(a=currentApp)
         f.write(views_string)
         f.close()
-
-
-if __name__ == '__main__':
-    check_requirements()
-    create_project()
-    create_app()
-    config_settings()
-    set_folder_structure()
-    create_template_files()
-    edit_project_urls()
-    create_app_urls()
-    edit_app_views()
     migrate_models()
-    make_migration_models()
-    runserver()
+    
