@@ -13,6 +13,11 @@ python 3+:
 
 install from https://python.org
 
+use:
+
+        pip3 install automate_django
+
+
 import package as shown below:
 
     from automate_django import automate_django as ad
