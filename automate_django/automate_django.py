@@ -377,7 +377,7 @@ Homepage
 {% endblock %}
 
 {% block scripts %}
-<script type="text/javascript>
+<script type="text/javascript">
 console.log('from index html');
 </script>
 {% endblock %}
